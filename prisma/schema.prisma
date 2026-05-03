@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  phone       String   @unique
+  password    String
+  city        String   @default("Delhi")
+  role        Role     @default(USER)
+  isVerified  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  tokenVersion Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+  otpTokens     OtpToken[]
+   incidents      Incident[]      
+  incidentVotes  IncidentVote[]  
+  routes         Route[] 
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model OtpToken {
+  id        String   @id @default(cuid())
+  otp       String
+  userId    String
+  type      OtpType  @default(PASSWORD_RESET)
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("otp_tokens")
+}
+
+
+model BlacklistedToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("blacklisted_tokens")
+}
+
+
+
+
+
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum OtpType {
+  PASSWORD_RESET
+  EMAIL_VERIFY
+  PHONE_VERIFY
+}
+
+
+
+model Incident {
+  id          String         @id @default(cuid())
+  type        IncidentType
+  description String?
+  latitude    Float
+  longitude   Float
+  address     String?
+  city        String
+  isAnonymous Boolean        @default(false)
+  status      IncidentStatus @default(PENDING)
+  upvotes     Int            @default(0)
+  downvotes   Int            @default(0)
+  reportedBy  String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  votes       IncidentVote[]
+  reporter    User?          @relation(fields: [reportedBy], references: [id])
+
+  @@map("incidents")
+}
+
+model IncidentVote {
+  id         String   @id @default(cuid())
+  incidentId String
+  userId     String
+  voteType   VoteType
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([incidentId, userId])
+  @@map("incident_votes")
+}
+
+enum IncidentType {
+  ROBBERY
+  HARASSMENT
+  VIOLENCE
+  STREET_FIGHT
+  PROTEST
+  ACCIDENT
+  SUSPICIOUS
+  ROAD_BLOCKED
+  UNSAFE_LIGHTING
+  OTHER
+}
+
+enum IncidentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+  FLAG
+}
+
+
+
+model Route {
+  id           String   @id @default(cuid())
+  userId       String
+  sourceLat    Float
+  sourceLng    Float
+  sourceAddr   String?
+  destLat      Float
+  destLng      Float
+  destAddr     String?
+  distance     Float?
+  duration     Float?
+  safetyScore  Int
+  riskLevel    RiskLevel
+  pathData     Json?
+  city         String   @default("Delhi")
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("routes")
+}
+
+enum RiskLevel {
+  SAFE
+  CAUTION
+  DANGER
+}
