@@ -1,4 +1,4 @@
-# 🛡️ SafeRoute — AI Urban Safety System
+# SafeRoute — AI Urban Safety System
 
 > AI-powered safe navigation API for metro cities
 
@@ -7,19 +7,19 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://docker.com)
 
-## 🚀 What is SafeRoute?
+## What is SafeRoute?
 
 SafeRoute helps metro city commuters navigate safely by avoiding high-risk areas. Instead of finding the fastest route, it finds the **safest route** using AI-powered risk scoring.
 
-## ✨ Features
+## Features
 
-- 🔐 **Auth** — JWT, Refresh tokens, Google OAuth, Token blacklist
-- 🗺️ **Safe Route Finder** — OSRM routing + AI safety score (0-100)
-- 🚨 **Incident Reporting** — Report theft, harassment, violence, protests
-- ⚡ **Real-time Alerts** — Socket.IO danger zone notifications
-- 🆘 **SOS Emergency** — Broadcast to trusted contacts instantly
-- 👮 **Admin Dashboard** — Heatmap, analytics, report moderation
-- 🐳 **Docker Ready** — One command deployment
+- **Auth** — JWT, Refresh tokens, Google OAuth, Token blacklist
+- **Safe Route Finder** — OSRM routing + AI safety score (0-100)
+- **Incident Reporting** — Report theft, harassment, violence, protests
+- **Real-time Alerts** — Socket.IO danger zone notifications
+- **SOS Emergency** — Broadcast to trusted contacts instantly
+- **Admin Dashboard** — Heatmap, analytics, report moderation
+- **Docker Ready** — One command deployment
 
 ## 🛠️ Tech Stack
 
@@ -74,7 +74,7 @@ PATCH /api/v1/admin/incidents/:id
 PATCH /api/v1/admin/users/:id/ban
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Docker se (Recommended)
 ```bash
@@ -91,13 +91,13 @@ npx prisma migrate dev
 npm run dev
 ```
 
-## 📖 API Docs
+## API Docs
 
 ```
 http://localhost:3000/docs
 ```
 
-## 🔒 Security
+## Security
 
 - JWT access tokens (15 min)
 - Refresh token rotation
@@ -106,7 +106,7 @@ http://localhost:3000/docs
 - bcrypt password hashing
 - Helmet + CORS
 
-## 📊 Safety Score
+## Safety Score
 
 ```
 Score = 100 - deductions
@@ -121,7 +121,7 @@ Night time  → weights x2
 7+ days old → 50% weight
 ```
 
-## 👨‍💻 Author
+## Author
 
 **Ahmad Suhel** — Full Stack Developer  
 [GitHub](https://github.com/Ahmadsuhel)

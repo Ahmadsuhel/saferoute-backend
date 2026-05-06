@@ -1,0 +1,88 @@
+name: SafeRoute CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Job 1: Test ──────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER:     postgres
+          POSTGRES_PASSWORD: postgres123
+          POSTGRES_DB:       saferoute_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres123@localhost:5432/saferoute_test
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres123@localhost:5432/saferoute_test
+
+      - name: Check server starts
+        run: |
+          node src/server.js &
+          sleep 5
+          curl -f http://localhost:3000/health || exit 1
+        env:
+          PORT:                   3000
+          NODE_ENV:               test
+          API_PREFIX:             /api/v1
+          DATABASE_URL:           postgresql://postgres:postgres123@localhost:5432/saferoute_test
+          JWT_SECRET:             test_jwt_secret
+          JWT_REFRESH_SECRET:     test_refresh_secret
+          JWT_EXPIRES_IN:         15m
+          JWT_REFRESH_EXPIRES_IN: 7d
+          SALT_ROUNDS:            10
+          APP_NAME:               SafeRoute API
+          APP_VERSION:            1.0.0
+          GOOGLE_CLIENT_ID:       test
+          GOOGLE_CLIENT_SECRET:   test
+          GOOGLE_CALLBACK_URL:    http://localhost:3000/api/v1/auth/google/callback
+          FRONTEND_URL:           http://localhost:4200
+
+  # ── Job 2: Build Docker ───────────────────────
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t saferoute-backend .
+
+      - name: Docker image built successfully
+        run: echo "Docker image built successfully"
